@@ -9,7 +9,7 @@ IO::IO(){
 	rom_pages[0] = std::make_shared<ROM>(14, "128-0.ROM", 0);
 	rom_pages[1] = std::make_shared<ROM>(14, "128-1.ROM", 1);
 
-	_mem_io.push_back( IOLocation(0x1c000, 0x00000, ram_pages[0]) );
+	mem_io.push_back( IOLocation(0x1c000, 0x00000, ram_pages[0]) );
 	_mem_io.push_back( IOLocation(0x1c000, 0x04000, ram_pages[1]) );
 	_mem_io.push_back( IOLocation(0x1c000, 0x08000, ram_pages[2]) );
 	_mem_io.push_back( IOLocation(0x1c000, 0x0c000, ram_pages[3]) );
@@ -78,9 +78,11 @@ uint32_t IO::translate_mem_addr(uint16_t address){//transl addressov
 }
 
 void PortFE::keydown(unsigned row, unsigned col) {
+	_key_matrix[row] &= ~(1 << col);
 }
 
 void PortFE::keyup(unsigned row, unsigned col) {
+
 }
 uint8_t PortFE::read(uint16_t address) {
 	uint8_t a = (address >>8);
@@ -92,12 +94,21 @@ uint8_t PortFE::read(uint16_t address) {
 	result &=(_ear << 6) |0b10111111;
 	return result;
 }
-
 uint8_t PortFE::read(uint16_t address) {
-}
-
+	uint8_t a = (address >> 8);
+		uint8_t p = (address & 0xff);
+	    switch (p) {
+	    case 0xfe: {uint8_t keys = 0x1f;
+	            for (uint8_t i = 0; i < 8; i++) {
+	                if ((a & (1 << i)) == 0)  keys &= _key_matrix[7 - i];
+	            }
+	            return (_ear << 6) | keys;}
+	        case 0xff:
+	            return _port_ff;
+	        default: break;}
+		return 0;}
 void PortFE::write(uint16_t address, uint8_t value) {
 	_border = value & 0x07;
 	_mic = !!(value & 0x08);
 	_beeper = !!(value & 0x10);
-}
+};
