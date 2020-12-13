@@ -25,16 +25,29 @@ Window::Window(int width, int height)
 				std::string("Window creation failed: ") +
 				SDL_GetError());
 
-	_renderer = std::shared_ptr<SDL_Renderer>(
-			SDL_CreateRenderer(_window.get(), -1, SDL_RENDERER_ACCELERATED),
+	_renderer = RendererPtr(
+			SDL_CreateRenderer(_window.get(), -1, SDL_RENDERER_ACCELERATED| SDL_RENDERER_PRESENTVSYNC),
 			SDL_DestroyRenderer);
 	if (_renderer == nullptr)
-		throw std::runtime_error(
-				std::string("Renderer creation failed: ") +
-				SDL_GetError());
+		throw std::runtime_error(SDL_GetError());
+	_io = std::make_unique<IO>)(_renderer.get(), &_tap_vram[0], $_tmp_border);
+	z80.set_mem_write_function([](uint16_t address, uint8_t val){
+		io.mem_write(address, val);
+	});
+	z80.set_mem_read_function([](uint16_t address)-> uint8_t{
+		return io.mem_read(address);
+	});z80.set_io_write_function([](uint16_t address, uint8_t val){
+		io.io_write(address, val);
+	});
+	z80.set_io_read_function([](uint16_t address)-> uint8_t{
+		return io.io_read(address);
+	});
+
+
+
 }
 
-static std::map<SDL_Scancode, std::pair<unsigned, unsigned>> s_keymap {
+/*static std::map<SDL_Scancode, std::pair<unsigned, unsigned>> s_keymap {
 	{ SDL_SCANCODE_Q, { 5, 0 } },
 	{ SDL_SCANCODE_W, { 5, 1 } },
 	{ SDL_SCANCODE_E, { 5, 2 } },
@@ -121,12 +134,18 @@ void Window::handle_event(const SDL_Event &event)
 void Window::handle_keys(const Uint8 *keys)
 {
 }
-
+*/
 void Window::do_logic()
 {
-	cpu.intr(0);
-//	cpu.ticks(71590);
-	cpu.ticks(25000);
+	static int ctr = 0;
+	ctr++;
+	if (ctr>10) {ctr = 0; _adrv->flash_flip();}
+	for (int i = 0;
+			i < IO::TOTAL_WIDTH * IO::TOTALHEIHGT / 8;
+			i++){
+		_adrv->do_8_tstates();
+		z80.execute(8);
+	}
 }
 
 void Window::render()

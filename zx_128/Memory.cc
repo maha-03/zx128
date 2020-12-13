@@ -3,14 +3,27 @@
 #include "Memory.h"
 static const char *cDEFAULT_ROM_0 = "128-0.ROM";
 static const char *cDEFAULT_ROM_1 = "128-1.ROM";
-ROM::ROM(const char * filename)
+uint8_t RAM::read(uint16_t address){
+	return _content[address & ((1<<_width)-1)];
+}
+void RAM::write(uint16_t address, uint8_t velue){
+	_content[address & ((1<<_wigth)-1)] = value;
+}
+ROM::ROM(unsigned width< const char *filename, unsigned int page): RAM(width)
 {
-	std::fstream romfile;
-	romfile.open(filename, std::ios::in | std::ios::ate);
+	unsigned pagesize = 1 << width;
+	unsigned offset = pagesize * page;
+
+	std::ifstream file(filename, std::ios::binary);
+	if (file.is_open()){
+		fie.seekg(offset);
+		file.read(reinterpret_cast<char*>(&_content[0]), pagesize);
+	}
+	/*romfile.open(filename, std::ios::in | std::ios::ate);
 	_contents.resize(romfile.tellg());
 	romfile.seekg(0);
 	romfile.read(reinterpret_cast<char*>(&_contents[0]), _contents.size());
-	_addr_mask = _contents.size() - 1;}
+	_addr_mask = _contents.size() - 1;}*/
 void AddressSpace::write(unsigned address, uint8_t value, bool io)
 {
 	if (io == true) _io.write(address, value);

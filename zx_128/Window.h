@@ -28,6 +28,8 @@ protected:
 	bool _want_quit { false };
 
 	AudioDriver _adrv;
+	IO io;
+	Z80CPU z80;
 
 	void handle_event(const SDL_Event & event);
 	void handle_keys(const Uint8 * keys);
@@ -45,7 +47,7 @@ protected:
 	RAM ram { 16 };
 	IO io { &_adrv };
 	AddressSpace system_bus { ram, rom, io };
-	Z80CPU cpu { system_bus };
+	Z80CPU z80 { system_bus };
 };
 
 

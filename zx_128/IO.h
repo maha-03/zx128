@@ -7,19 +7,23 @@
 class IO
 {
 protected:
-	uint8_t _port_fe { 0x00 };
+	//uint8_t _port_fe { 0x00 };
 	uint8_t _ear { 0x00 };
 
 //uint8_t _key_matrix[8] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 	uint8_t _key_matrix[8] { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
+	std::vector<IOLocation> _mem_io;
+	std::vector<IOLocation> _io_io;
 	AudioDriver * _adrv;
-
+	//Device::Ptr port_7ffd;
 public:
 	IO(AudioDriver * drv): _adrv(drv) {}
 
-	void write(unsigned address, uint8_t value);
-	uint8_t read(unsigned address) const;
+	void mem_write(uint16_t address, uint8_t value);
+	uint8_t mem_read(uint16_t address);
+	void io_write(uint16_t address, uint8_t value);
+	uint8_t io_read(uint16_t address);
 
 	uint8_t border() const { return _port_fe & 0x07; }
 
@@ -30,7 +34,7 @@ public:
 class Device
 {
 public:
-	using Ptr = std::shared_ptr<Device>;
+	//using Ptr = std::shared_ptr<Device>;
 	virtual ~Device() = default;
 
 	virtual void write(uint16_t address, uint8_t value) = 0;
@@ -52,8 +56,20 @@ public:
 
 	void reset() { _value = 0;}
 };
-class PortFE: public Device
+class PortFE: public Device//клавиатура, бипер, бордюр и т.д.
 {
+protected:
+	unsigned _border { 0 };
+	unsigned _ear { 0 };
+	unsigned _mic { 0 };//реализ порта магнитоф
+	unsigned _beeper { 0 };
+	uint8_t _key_atrix[8] {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+public:
 
+	unsigned border()const {return _border & 0x07;}
+	void keydown(unsigned row, unsigned col);
+	void keyup(unsigned row, unsigned col);
+	virtual uint8_t read(uint16_t address) override;
+	virtual void write(uint16_t address, uint8_t value) override;
 };
 #endif /* IO_H_ */
