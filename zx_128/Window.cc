@@ -1,7 +1,10 @@
 #include <stdexcept>
 #include "Window.h"
 #include <map>
-
+#include <fstream>
+#include <cstdint>
+#include <functional>
+#include <vector>
 static const int gre[16] = {	0,   0,   0,   0, 168, 168, 168, 168,
 								0,   0,   0,   0, 255, 255, 255, 255, };
 static const int red[16] = {	0,   0, 168, 168,   0,   0, 168, 168,

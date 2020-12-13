@@ -3,7 +3,7 @@
 #include <functional>
 #include <vector>
 #include "Z80CPU.h"
-#include <libspectrum.h>
+#include "libspectrum\include\libspectrum.h"
 #pragma pack(push, 1)
 
 byte cb_mem_read(void* param, ushort address)
@@ -15,7 +15,7 @@ byte cb_io_read(void* param, ushort address)
 {
 	auto cpu = reinterpret_cast<Z80CPU*>(param);
 	return cpu -> _io_read(address);
-}				ReadFunction _io_read		{[] (uint16_t) -> uint8_t { return 0; }};
+}				//ReadFunction _io_read		{[] (uint16_t) -> uint8_t { return 0; }};
 void cb_mem_write(void* param, ushort address, byte data)
 {
 	auto cpu = reinterpret_cast<Z80CPU*>(param);
@@ -25,21 +25,7 @@ void cb_io_write(void* param, ushort address, byte data)
 {
 	auto cpu = reinterpret_cast<Z80CPU*>(param);
 	cpu -> _io_write(address);
-}
-Z80CPU::Z80CPU(){
-	_context.memParam = _context.ioParam = this;
-}
-void Z80CPU::reset() {Z80RESET (&_context);
-}
-
-void Z80CPU::intr(uint8_t vec) {Z80INT(&_context, vec);
-}
-
-void Z80CPU::nmi() {Z80NMIESERT(&_context);
-}
-
-void Z80CPU::execute(unsigned tstates) {Z80ExecuteTStates(&_context, tstates)
-}
+}/*
 struct SNA_Header
 {
 	uint8_t I;
@@ -102,5 +88,27 @@ struct Z80_Header_2
 	uint8_t joy2[10];
 	uint8_t fsck_those_bytes[4];
 };
-#pragma pack(pop)
+#pragma pack(pop)*/
+Z80CPU::Z80CPU(){
+	_context.memParam = _context.ioParam = this;
+}
+void Z80CPU::reset()
+{
+	Z80RESET (&_context);
+}
+
+void Z80CPU::intr(uint8_t vec)
+{
+	Z80INT(&_context, vec);
+}
+
+void Z80CPU::nmi()
+{
+	Z80NMIESERT(&_context);
+}
+
+void Z80CPU::execute(unsigned tstates)
+{
+	Z80ExecuteTStates(&_context, tstates);
+}
 
